@@ -1,0 +1,82 @@
+{
+    "name": "pl_RunSalesETL",
+    "properties": {
+        "activities": [
+            {
+                "name": "executesp_bronze",
+                "type": "SqlServerStoredProcedure",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [
+                    {
+                        "name": "layer",
+                        "value": "bronze"
+                    }
+                ],
+                "typeProperties": {
+                    "storedProcedureName": "[bronze].[load_bronze]"
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_sqlserver",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "Wait1",
+                "type": "Wait",
+                "dependsOn": [
+                    {
+                        "activity": "executesp_bronze",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "userProperties": [],
+                "typeProperties": {
+                    "waitTimeInSeconds": 45
+                }
+            },
+            {
+                "name": "executesp_silver",
+                "type": "SqlServerStoredProcedure",
+                "dependsOn": [
+                    {
+                        "activity": "Wait1",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [
+                    {
+                        "name": "layer",
+                        "value": "silver"
+                    }
+                ],
+                "typeProperties": {
+                    "storedProcedureName": "[silver].[load_silver]"
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_sqlserver",
+                    "type": "LinkedServiceReference"
+                }
+            }
+        ],
+        "annotations": []
+    }
+}
+ 
